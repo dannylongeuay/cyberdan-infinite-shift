@@ -19,14 +19,25 @@ export class Game {
   private state: GameState = "ready";
   private score: number = 0;
   private lastTime: number = 0;
+  private width: number;
+  private height: number;
 
-  constructor(private canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement) {
+    const dpr = window.devicePixelRatio || 1;
+    this.width = canvas.width / dpr;
+    this.height = canvas.height / dpr;
     this.renderer = new Renderer(canvas);
     this.input = new Input(canvas);
     this.spawner = new Spawner();
-    this.player = new Player(canvas.width / 2, canvas.height * 0.75);
+    this.player = new Player(this.width / 2, this.height * 0.75);
 
     this.input.onInput((x, y) => this.handleInput(x, y));
+  }
+
+  resize(width: number, height: number) {
+    this.width = width;
+    this.height = height;
+    this.player.clampToScreen(width, height);
   }
 
   start() {
@@ -50,13 +61,13 @@ export class Game {
   private update(dt: number) {
     this.score += dt;
 
-    this.player.update(dt, this.canvas.width, this.canvas.height);
+    this.player.update(dt, this.width, this.height);
 
     this.spawner.update(
       dt,
       this.score,
-      this.canvas.width,
-      this.canvas.height,
+      this.width,
+      this.height,
       this.enemies,
       this.obstacles
     );
@@ -72,7 +83,7 @@ export class Game {
     }
 
     // Cleanup off-screen enemies
-    this.enemies = this.enemies.filter((e) => !e.isOffScreen(this.canvas.height));
+    this.enemies = this.enemies.filter((e) => !e.isOffScreen(this.height));
 
     // Cleanup expired obstacles
     this.obstacles = this.obstacles.filter((o) => !o.isExpired);
@@ -144,6 +155,6 @@ export class Game {
     this.enemies = [];
     this.obstacles = [];
     this.spawner.reset();
-    this.player.reset(this.canvas.width / 2, this.canvas.height * 0.75);
+    this.player.reset(this.width / 2, this.height * 0.75);
   }
 }

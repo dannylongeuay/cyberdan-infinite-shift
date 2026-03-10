@@ -13,14 +13,12 @@ export class Input {
   }
 
   private handleClick = (e: MouseEvent) => {
-    const dpr = window.devicePixelRatio || 1;
-    this.callback?.(e.clientX * dpr, e.clientY * dpr);
+    this.callback?.(e.clientX, e.clientY);
   };
 
   private handleTouch = (e: TouchEvent) => {
     e.preventDefault();
     const touch = e.touches[0];
-    const dpr = window.devicePixelRatio || 1;
-    this.callback?.(touch.clientX * dpr, touch.clientY * dpr);
+    this.callback?.(touch.clientX, touch.clientY);
   };
 }

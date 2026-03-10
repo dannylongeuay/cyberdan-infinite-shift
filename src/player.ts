@@ -39,6 +39,13 @@ export class Player {
     this.pos.y = Math.max(this.size, Math.min(height - this.size, this.pos.y));
   }
 
+  clampToScreen(width: number, height: number) {
+    this.pos.x = Math.max(this.size, Math.min(width - this.size, this.pos.x));
+    this.pos.y = Math.max(this.size, Math.min(height - this.size, this.pos.y));
+    this.target.x = Math.max(this.size, Math.min(width - this.size, this.target.x));
+    this.target.y = Math.max(this.size, Math.min(height - this.size, this.target.y));
+  }
+
   reset(x: number, y: number) {
     this.pos = { x, y };
     this.target = { x, y };

@@ -10,7 +10,11 @@ function resize() {
 }
 
 resize();
-window.addEventListener("resize", resize);
 
 const game = new Game(canvas);
 game.start();
+
+window.addEventListener("resize", () => {
+  resize();
+  game.resize(window.innerWidth, window.innerHeight);
+});

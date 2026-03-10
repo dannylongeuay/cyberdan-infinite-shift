@@ -11,9 +11,25 @@ export class Renderer {
     this.ctx = canvas.getContext("2d")!;
   }
 
+  /** CSS-pixel width (what the user actually sees). */
+  private get cssWidth() {
+    return this.canvas.width / (window.devicePixelRatio || 1);
+  }
+
+  /** CSS-pixel height (what the user actually sees). */
+  private get cssHeight() {
+    return this.canvas.height / (window.devicePixelRatio || 1);
+  }
+
   clear() {
-    this.ctx.fillStyle = COLOR_BG;
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    const ctx = this.ctx;
+    const dpr = window.devicePixelRatio || 1;
+    // Reset transform and fill the full physical canvas
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = COLOR_BG;
+    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    // Scale so all subsequent drawing is in CSS-pixel coordinates
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
 
   drawPlayer(player: Player) {
@@ -83,8 +99,8 @@ export class Renderer {
 
   drawReadyScreen() {
     const ctx = this.ctx;
-    const cx = this.canvas.width / 2;
-    const cy = this.canvas.height / 2;
+    const cx = this.cssWidth / 2;
+    const cy = this.cssHeight / 2;
 
     ctx.fillStyle = COLOR_UI;
     ctx.font = "bold 36px monospace";
@@ -100,11 +116,11 @@ export class Renderer {
 
   drawGameOverScreen(score: number) {
     const ctx = this.ctx;
-    const cx = this.canvas.width / 2;
-    const cy = this.canvas.height / 2;
+    const cx = this.cssWidth / 2;
+    const cy = this.cssHeight / 2;
 
     ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-    ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+    ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
 
     ctx.fillStyle = COLOR_UI;
     ctx.font = "bold 36px monospace";
