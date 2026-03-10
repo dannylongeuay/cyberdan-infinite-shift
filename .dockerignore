@@ -1,0 +1,12 @@
+.git
+node_modules
+dist
+.direnv
+.envrc
+flake.nix
+flake.lock
+result
+result-*
+.claude
+README.md
+LICENSE
