@@ -3,7 +3,7 @@ import { Renderer } from "./renderer";
 import { Input } from "./input";
 import { Spawner } from "./spawner";
 import { checkCollision } from "./collision";
-import { MAX_DT, PLAYER_SPAWN_Y_RATIO } from "./types";
+import { MAX_DT, MAX_ENEMIES, MAX_OBSTACLES, PLAYER_SPAWN_Y_RATIO } from "./types";
 import type { Enemy } from "./enemy";
 import type { Obstacle } from "./obstacle";
 
@@ -17,8 +17,7 @@ export class Game {
   private enemies: Enemy[] = [];
   private obstacles: Obstacle[] = [];
   private state: GameState = "ready";
-  private dragging = false;
-  private score: number = 0;
+  private elapsedTime: number = 0;
   private lastTime: number = 0;
   private width: number;
   private height: number;
@@ -49,6 +48,10 @@ export class Game {
     this.scheduleFrame();
   }
 
+  destroy() {
+    this.input.destroy();
+  }
+
   private scheduleFrame() {
     requestAnimationFrame((t) => this.loop(t));
   }
@@ -63,25 +66,21 @@ export class Game {
     }
 
     this.render();
-
-    if (this.state !== "gameover") {
-      this.scheduleFrame();
-    }
+    this.scheduleFrame();
   }
 
   private update(dt: number) {
-    this.score += dt;
+    this.elapsedTime += dt;
 
     this.player.update(dt, this.width, this.height);
 
-    this.spawner.update(
-      dt,
-      this.score,
-      this.width,
-      this.height,
-      this.enemies,
-      this.obstacles
-    );
+    const spawned = this.spawner.update(dt, this.elapsedTime, this.width, this.height);
+    if (this.enemies.length < MAX_ENEMIES) {
+      this.enemies.push(...spawned.enemies);
+    }
+    if (this.obstacles.length < MAX_OBSTACLES) {
+      this.obstacles.push(...spawned.obstacles);
+    }
 
     // Update enemies
     for (const enemy of this.enemies) {
@@ -95,7 +94,7 @@ export class Game {
 
     // Cleanup off-screen enemies (reverse-iterate to avoid index shifting)
     for (let i = this.enemies.length - 1; i >= 0; i--) {
-      if (this.enemies[i].isOffScreen(this.height)) {
+      if (this.enemies[i].isOffScreen(this.width, this.height)) {
         this.enemies.splice(i, 1);
       }
     }
@@ -143,10 +142,10 @@ export class Game {
       this.renderer.drawEnemy(enemy);
     }
     this.renderer.drawPlayer(this.player);
-    this.renderer.drawHUD(this.score);
+    this.renderer.drawHUD(this.elapsedTime);
 
     if (this.state === "gameover") {
-      this.renderer.drawGameOverScreen(this.score);
+      this.renderer.drawGameOverScreen(this.elapsedTime);
     }
   }
 
@@ -156,28 +155,23 @@ export class Game {
         this.state = "playing";
         break;
       case "playing":
-        this.dragging = false;
         this.player.setTarget(x, y);
         break;
       case "gameover":
         this.restart();
-        this.lastTime = performance.now();
-        this.scheduleFrame();
         break;
     }
   }
 
   private handleMove(x: number, y: number) {
     if (this.state !== "playing") return;
-    this.dragging = true;
     this.player.setTarget(x, y);
   }
 
   private handleRelease() {
     if (this.state !== "playing") return;
-    if (this.dragging) {
+    if (this.input.hasMoved) {
       this.player.stop();
-      this.dragging = false;
     }
   }
 
@@ -187,11 +181,10 @@ export class Game {
 
   private restart() {
     this.state = "playing";
-    this.score = 0;
+    this.elapsedTime = 0;
     this.enemies = [];
     this.obstacles = [];
     this.spawner.reset();
-    this.dragging = false;
     this.player.reset(this.width / 2, this.height * PLAYER_SPAWN_Y_RATIO);
   }
 }

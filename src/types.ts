@@ -4,6 +4,7 @@ export interface Vec2 {
 }
 
 export type ShapeKind = "circle" | "square" | "hexagon" | "octagon";
+export const ENTITY_SHAPES: ShapeKind[] = ["circle", "square", "hexagon", "octagon"];
 
 // Player
 export const PLAYER_SIZE = 14; // bounding radius
@@ -37,6 +38,7 @@ export const OBSTACLE_WARNING_DURATION = 1.0; // seconds
 export const COLOR_BG = "#111111";
 export const COLOR_ENEMY = "#ff8844";
 export const COLOR_OBSTACLE = "#ff4444";
+export const COLOR_OVERLAY = "rgba(0, 0, 0, 0.6)";
 export const COLOR_PLAYER = "#44aaff";
 export const COLOR_UI = "#ffffff";
 
@@ -45,6 +47,10 @@ export const FONT_HUD = "bold 24px monospace";
 export const FONT_SCORE = "bold 28px monospace";
 export const FONT_SUBTITLE = "20px monospace";
 export const FONT_TITLE = "bold 36px monospace";
+
+// Entity caps
+export const MAX_ENEMIES = 100;
+export const MAX_OBSTACLES = 20;
 
 // Misc
 export const MAX_DT = 0.1; // cap delta time to handle tab-away

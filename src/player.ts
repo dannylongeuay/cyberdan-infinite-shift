@@ -14,7 +14,8 @@ export class Player {
   }
 
   setTarget(x: number, y: number) {
-    this.target = { x, y };
+    this.target.x = x;
+    this.target.y = y;
   }
 
   update(dt: number, width: number, height: number) {
@@ -53,8 +54,10 @@ export class Player {
   }
 
   reset(x: number, y: number) {
-    this.pos = { x, y };
-    this.target = { x, y };
+    this.pos.x = x;
+    this.pos.y = y;
+    this.target.x = x;
+    this.target.y = y;
     this.angle = 0;
   }
 }

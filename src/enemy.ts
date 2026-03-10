@@ -1,7 +1,5 @@
-import { ENEMY_SIZE } from "./types";
+import { ENEMY_SIZE, ENTITY_SHAPES } from "./types";
 import type { Vec2, ShapeKind } from "./types";
-
-const ENEMY_SHAPES: ShapeKind[] = ["circle", "square", "hexagon", "octagon"];
 
 export class Enemy {
   pos: Vec2;
@@ -14,7 +12,7 @@ export class Enemy {
     this.pos = { x, y };
     this.vel = { x: vx, y: vy };
     this.angle = Math.atan2(vy, vx);
-    this.shape = ENEMY_SHAPES[Math.floor(Math.random() * ENEMY_SHAPES.length)];
+    this.shape = ENTITY_SHAPES[Math.floor(Math.random() * ENTITY_SHAPES.length)];
   }
 
   update(dt: number) {
@@ -22,7 +20,13 @@ export class Enemy {
     this.pos.y += this.vel.y * dt;
   }
 
-  isOffScreen(height: number): boolean {
-    return this.pos.y > height + this.size * 2;
+  isOffScreen(width: number, height: number): boolean {
+    const margin = this.size * 2;
+    return (
+      this.pos.x < -margin ||
+      this.pos.x > width + margin ||
+      this.pos.y < -margin ||
+      this.pos.y > height + margin
+    );
   }
 }

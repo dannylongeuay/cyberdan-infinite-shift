@@ -27,10 +27,11 @@ export class Spawner {
     dt: number,
     elapsed: number,
     width: number,
-    height: number,
-    enemies: Enemy[],
-    obstacles: Obstacle[]
-  ) {
+    height: number
+  ): { enemies: Enemy[]; obstacles: Obstacle[] } {
+    const enemies: Enemy[] = [];
+    const obstacles: Obstacle[] = [];
+
     // Enemy spawning
     const enemyInterval = Math.max(
       ENEMY_SPAWN_INTERVAL_MIN,
@@ -39,7 +40,7 @@ export class Spawner {
     this.enemyTimer += dt;
     if (this.enemyTimer >= enemyInterval) {
       this.enemyTimer -= enemyInterval;
-      this.spawnEnemy(elapsed, width, enemies);
+      enemies.push(this.createEnemy(elapsed, width));
     }
 
     // Obstacle spawning
@@ -50,22 +51,24 @@ export class Spawner {
     this.obstacleTimer += dt;
     if (this.obstacleTimer >= obstacleInterval) {
       this.obstacleTimer -= obstacleInterval;
-      this.spawnObstacle(width, height, obstacles);
+      obstacles.push(this.createObstacle(width, height));
     }
+
+    return { enemies, obstacles };
   }
 
-  private spawnEnemy(elapsed: number, width: number, enemies: Enemy[]) {
+  private createEnemy(elapsed: number, width: number): Enemy {
     const x = Math.random() * width;
     const speed = ENEMY_BASE_SPEED + ENEMY_SPEED_GROWTH * elapsed;
     const angle = Math.PI / 2 + (Math.random() * 2 - 1) * ENEMY_ANGULAR_SPREAD;
     const vx = Math.cos(angle) * speed;
     const vy = Math.sin(angle) * speed;
-    enemies.push(new Enemy(x, ENEMY_SPAWN_Y_OFFSET, vx, vy));
+    return new Enemy(x, ENEMY_SPAWN_Y_OFFSET, vx, vy);
   }
 
-  private spawnObstacle(width: number, height: number, obstacles: Obstacle[]) {
+  private createObstacle(width: number, height: number): Obstacle {
     const x = OBSTACLE_SPAWN_MARGIN + Math.random() * (width - OBSTACLE_SPAWN_MARGIN * 2);
     const y = OBSTACLE_SPAWN_MARGIN + Math.random() * (height - OBSTACLE_SPAWN_MARGIN * 2);
-    obstacles.push(new Obstacle(x, y));
+    return new Obstacle(x, y);
   }
 }

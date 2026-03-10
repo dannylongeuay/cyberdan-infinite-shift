@@ -3,6 +3,7 @@ import {
   COLOR_PLAYER,
   COLOR_ENEMY,
   COLOR_OBSTACLE,
+  COLOR_OVERLAY,
   COLOR_UI,
   PLAYER_TRIANGLE_BACK,
   PLAYER_TRIANGLE_HALF_WIDTH,
@@ -22,7 +23,9 @@ export class Renderer {
   private dpr: number;
 
   constructor(private canvas: HTMLCanvasElement) {
-    this.ctx = canvas.getContext("2d")!;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) throw new Error("Failed to get 2D rendering context");
+    this.ctx = ctx;
     this.dpr = window.devicePixelRatio || 1;
   }
 
@@ -137,7 +140,7 @@ export class Renderer {
     const cx = this.cssWidth / 2;
     const cy = this.cssHeight / 2;
 
-    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.fillStyle = COLOR_OVERLAY;
     ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
 
     ctx.fillStyle = COLOR_UI;

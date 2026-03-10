@@ -6,6 +6,7 @@ export class Input {
   private moveCallback: InputCallback | null = null;
   private releaseCallback: ReleaseCallback | null = null;
   private pointerDown = false;
+  hasMoved = false;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.canvas.addEventListener("pointerdown", this.handlePointerDown);
@@ -34,6 +35,7 @@ export class Input {
 
   private handlePointerDown = (e: PointerEvent) => {
     this.pointerDown = true;
+    this.hasMoved = false;
     this.canvas.setPointerCapture(e.pointerId);
     const [x, y] = this.toCanvasCoords(e);
     this.pressCallback?.(x, y);
@@ -41,6 +43,7 @@ export class Input {
 
   private handlePointerMove = (e: PointerEvent) => {
     if (!this.pointerDown) return;
+    this.hasMoved = true;
     const [x, y] = this.toCanvasCoords(e);
     this.moveCallback?.(x, y);
   };

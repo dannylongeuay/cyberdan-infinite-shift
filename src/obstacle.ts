@@ -1,7 +1,5 @@
-import { OBSTACLE_SIZE, OBSTACLE_WARNING_DURATION, OBSTACLE_ACTIVE_DURATION, OBSTACLE_SPIN_SPEED } from "./types";
+import { OBSTACLE_SIZE, OBSTACLE_WARNING_DURATION, OBSTACLE_ACTIVE_DURATION, OBSTACLE_SPIN_SPEED, ENTITY_SHAPES } from "./types";
 import type { Vec2, ShapeKind } from "./types";
-
-const OBSTACLE_SHAPES: ShapeKind[] = ["circle", "square", "hexagon", "octagon"];
 
 export type ObstaclePhase = "warning" | "active" | "expired";
 
@@ -15,7 +13,7 @@ export class Obstacle {
 
   constructor(x: number, y: number) {
     this.pos = { x, y };
-    this.shape = OBSTACLE_SHAPES[Math.floor(Math.random() * OBSTACLE_SHAPES.length)];
+    this.shape = ENTITY_SHAPES[Math.floor(Math.random() * ENTITY_SHAPES.length)];
   }
 
   update(dt: number) {

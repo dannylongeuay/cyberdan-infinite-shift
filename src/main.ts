@@ -1,7 +1,9 @@
 import "./style.css";
 import { Game } from "./game";
 
-const canvas = document.getElementById("game") as HTMLCanvasElement;
+const el = document.querySelector<HTMLCanvasElement>("#game");
+if (!el) throw new Error("Canvas element #game not found");
+const canvas = el;
 
 function resize() {
   const dpr = window.devicePixelRatio || 1;
