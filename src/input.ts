@@ -13,12 +13,20 @@ export class Input {
   }
 
   private handleClick = (e: MouseEvent) => {
-    this.callback?.(e.clientX, e.clientY);
+    const rect = this.canvas.getBoundingClientRect();
+    this.callback?.(e.clientX - rect.left, e.clientY - rect.top);
   };
 
   private handleTouch = (e: TouchEvent) => {
     e.preventDefault();
     const touch = e.touches[0];
-    this.callback?.(touch.clientX, touch.clientY);
+    const rect = this.canvas.getBoundingClientRect();
+    this.callback?.(touch.clientX - rect.left, touch.clientY - rect.top);
   };
+
+  destroy() {
+    this.canvas.removeEventListener("click", this.handleClick);
+    this.canvas.removeEventListener("touchstart", this.handleTouch);
+    this.callback = null;
+  }
 }

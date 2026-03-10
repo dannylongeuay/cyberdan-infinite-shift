@@ -34,16 +34,17 @@ export class Player {
       }
     }
 
-    // Clamp to screen bounds
-    this.pos.x = Math.max(this.size, Math.min(width - this.size, this.pos.x));
-    this.pos.y = Math.max(this.size, Math.min(height - this.size, this.pos.y));
+    this.clampVec(this.pos, width, height);
   }
 
   clampToScreen(width: number, height: number) {
-    this.pos.x = Math.max(this.size, Math.min(width - this.size, this.pos.x));
-    this.pos.y = Math.max(this.size, Math.min(height - this.size, this.pos.y));
-    this.target.x = Math.max(this.size, Math.min(width - this.size, this.target.x));
-    this.target.y = Math.max(this.size, Math.min(height - this.size, this.target.y));
+    this.clampVec(this.pos, width, height);
+    this.clampVec(this.target, width, height);
+  }
+
+  private clampVec(v: Vec2, width: number, height: number) {
+    v.x = Math.max(this.size, Math.min(width - this.size, v.x));
+    v.y = Math.max(this.size, Math.min(height - this.size, v.y));
   }
 
   reset(x: number, y: number) {

@@ -1,4 +1,17 @@
-import { COLOR_BG, COLOR_PLAYER, COLOR_ENEMY, COLOR_OBSTACLE, COLOR_UI } from "./types";
+import {
+  COLOR_BG,
+  COLOR_PLAYER,
+  COLOR_ENEMY,
+  COLOR_OBSTACLE,
+  COLOR_UI,
+  PLAYER_TRIANGLE_BACK,
+  PLAYER_TRIANGLE_HALF_WIDTH,
+  OBSTACLE_PULSE_SPEED,
+  FONT_HUD,
+  FONT_TITLE,
+  FONT_SCORE,
+  FONT_SUBTITLE,
+} from "./types";
 import type { Player } from "./player";
 import type { Enemy } from "./enemy";
 import type { Obstacle } from "./obstacle";
@@ -6,30 +19,35 @@ import type { ShapeKind } from "./types";
 
 export class Renderer {
   private ctx: CanvasRenderingContext2D;
+  private dpr: number;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext("2d")!;
+    this.dpr = window.devicePixelRatio || 1;
+  }
+
+  updateDpr() {
+    this.dpr = window.devicePixelRatio || 1;
   }
 
   /** CSS-pixel width (what the user actually sees). */
   private get cssWidth() {
-    return this.canvas.width / (window.devicePixelRatio || 1);
+    return this.canvas.width / this.dpr;
   }
 
   /** CSS-pixel height (what the user actually sees). */
   private get cssHeight() {
-    return this.canvas.height / (window.devicePixelRatio || 1);
+    return this.canvas.height / this.dpr;
   }
 
   clear() {
     const ctx = this.ctx;
-    const dpr = window.devicePixelRatio || 1;
     // Reset transform and fill the full physical canvas
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.fillStyle = COLOR_BG;
     ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     // Scale so all subsequent drawing is in CSS-pixel coordinates
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
   }
 
   drawPlayer(player: Player) {
@@ -44,8 +62,8 @@ export class Renderer {
     ctx.beginPath();
     // Triangle: front point at +size, two rear points
     ctx.moveTo(size, 0);
-    ctx.lineTo(-size * 0.7, -size * 0.6);
-    ctx.lineTo(-size * 0.7, size * 0.6);
+    ctx.lineTo(-size * PLAYER_TRIANGLE_BACK, -size * PLAYER_TRIANGLE_HALF_WIDTH);
+    ctx.lineTo(-size * PLAYER_TRIANGLE_BACK, size * PLAYER_TRIANGLE_HALF_WIDTH);
     ctx.closePath();
     ctx.fillStyle = COLOR_PLAYER;
     ctx.fill();
@@ -74,11 +92,11 @@ export class Renderer {
 
     if (obstacle.phase === "warning") {
       // Pulsing outline
-      const pulse = 0.5 + 0.5 * Math.sin(obstacle.elapsed * 8);
+      const pulse = 0.5 + 0.5 * Math.sin(obstacle.elapsed * OBSTACLE_PULSE_SPEED);
       ctx.strokeStyle = COLOR_OBSTACLE;
       ctx.globalAlpha = 0.3 + 0.7 * pulse;
       ctx.lineWidth = 2;
-      this.drawShapeStroke(obstacle.shape, obstacle.size);
+      this.drawShape(obstacle.shape, obstacle.size, "stroke");
       ctx.globalAlpha = 1;
     } else if (obstacle.phase === "active") {
       ctx.fillStyle = COLOR_OBSTACLE;
@@ -91,7 +109,7 @@ export class Renderer {
   drawHUD(score: number) {
     const ctx = this.ctx;
     ctx.fillStyle = COLOR_UI;
-    ctx.font = "bold 24px monospace";
+    ctx.font = FONT_HUD;
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
     ctx.fillText(score.toFixed(1), 16, 16);
@@ -103,12 +121,12 @@ export class Renderer {
     const cy = this.cssHeight / 2;
 
     ctx.fillStyle = COLOR_UI;
-    ctx.font = "bold 36px monospace";
+    ctx.font = FONT_TITLE;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("INFINITE SHIFT", cx, cy - 40);
 
-    ctx.font = "20px monospace";
+    ctx.font = FONT_SUBTITLE;
     ctx.globalAlpha = 0.6;
     ctx.fillText("Click or Tap to Start", cx, cy + 20);
     ctx.globalAlpha = 1;
@@ -123,60 +141,39 @@ export class Renderer {
     ctx.fillRect(0, 0, this.cssWidth, this.cssHeight);
 
     ctx.fillStyle = COLOR_UI;
-    ctx.font = "bold 36px monospace";
+    ctx.font = FONT_TITLE;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("GAME OVER", cx, cy - 50);
 
-    ctx.font = "bold 28px monospace";
+    ctx.font = FONT_SCORE;
     ctx.fillText(score.toFixed(1) + "s", cx, cy);
 
-    ctx.font = "20px monospace";
+    ctx.font = FONT_SUBTITLE;
     ctx.globalAlpha = 0.6;
     ctx.fillText("Click or Tap to Restart", cx, cy + 50);
     ctx.globalAlpha = 1;
   }
 
-  private drawShape(shape: ShapeKind, size: number) {
+  private drawShape(shape: ShapeKind, size: number, mode: "fill" | "stroke" = "fill") {
     const ctx = this.ctx;
     switch (shape) {
       case "circle":
         ctx.beginPath();
         ctx.arc(0, 0, size, 0, Math.PI * 2);
-        ctx.fill();
+        ctx[mode]();
         break;
       case "square":
-        ctx.fillRect(-size, -size, size * 2, size * 2);
+        if (mode === "fill") ctx.fillRect(-size, -size, size * 2, size * 2);
+        else ctx.strokeRect(-size, -size, size * 2, size * 2);
         break;
       case "hexagon":
         this.drawPolygon(6, size);
-        ctx.fill();
+        ctx[mode]();
         break;
       case "octagon":
         this.drawPolygon(8, size);
-        ctx.fill();
-        break;
-    }
-  }
-
-  private drawShapeStroke(shape: ShapeKind, size: number) {
-    const ctx = this.ctx;
-    switch (shape) {
-      case "circle":
-        ctx.beginPath();
-        ctx.arc(0, 0, size, 0, Math.PI * 2);
-        ctx.stroke();
-        break;
-      case "square":
-        ctx.strokeRect(-size, -size, size * 2, size * 2);
-        break;
-      case "hexagon":
-        this.drawPolygon(6, size);
-        ctx.stroke();
-        break;
-      case "octagon":
-        this.drawPolygon(8, size);
-        ctx.stroke();
+        ctx[mode]();
         break;
     }
   }

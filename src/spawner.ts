@@ -6,8 +6,12 @@ import {
   ENEMY_SPAWN_INTERVAL_START,
   ENEMY_SPAWN_INTERVAL_MIN,
   ENEMY_ANGULAR_SPREAD,
+  ENEMY_SPAWN_Y_OFFSET,
+  ENEMY_INTERVAL_DECAY,
   OBSTACLE_SPAWN_INTERVAL_START,
   OBSTACLE_SPAWN_INTERVAL_MIN,
+  OBSTACLE_SPAWN_MARGIN,
+  OBSTACLE_INTERVAL_DECAY,
 } from "./types";
 
 export class Spawner {
@@ -30,7 +34,7 @@ export class Spawner {
     // Enemy spawning
     const enemyInterval = Math.max(
       ENEMY_SPAWN_INTERVAL_MIN,
-      ENEMY_SPAWN_INTERVAL_START - elapsed * 0.06
+      ENEMY_SPAWN_INTERVAL_START - elapsed * ENEMY_INTERVAL_DECAY
     );
     this.enemyTimer += dt;
     if (this.enemyTimer >= enemyInterval) {
@@ -41,7 +45,7 @@ export class Spawner {
     // Obstacle spawning
     const obstacleInterval = Math.max(
       OBSTACLE_SPAWN_INTERVAL_MIN,
-      OBSTACLE_SPAWN_INTERVAL_START - elapsed * 0.08
+      OBSTACLE_SPAWN_INTERVAL_START - elapsed * OBSTACLE_INTERVAL_DECAY
     );
     this.obstacleTimer += dt;
     if (this.obstacleTimer >= obstacleInterval) {
@@ -56,13 +60,12 @@ export class Spawner {
     const angle = Math.PI / 2 + (Math.random() * 2 - 1) * ENEMY_ANGULAR_SPREAD;
     const vx = Math.cos(angle) * speed;
     const vy = Math.sin(angle) * speed;
-    enemies.push(new Enemy(x, -20, vx, vy));
+    enemies.push(new Enemy(x, ENEMY_SPAWN_Y_OFFSET, vx, vy));
   }
 
   private spawnObstacle(width: number, height: number, obstacles: Obstacle[]) {
-    const margin = 60;
-    const x = margin + Math.random() * (width - margin * 2);
-    const y = margin + Math.random() * (height - margin * 2);
+    const x = OBSTACLE_SPAWN_MARGIN + Math.random() * (width - OBSTACLE_SPAWN_MARGIN * 2);
+    const y = OBSTACLE_SPAWN_MARGIN + Math.random() * (height - OBSTACLE_SPAWN_MARGIN * 2);
     obstacles.push(new Obstacle(x, y));
   }
 }

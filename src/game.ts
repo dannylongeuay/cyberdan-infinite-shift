@@ -3,7 +3,7 @@ import { Renderer } from "./renderer";
 import { Input } from "./input";
 import { Spawner } from "./spawner";
 import { checkCollision } from "./collision";
-import { MAX_DT } from "./types";
+import { MAX_DT, PLAYER_SPAWN_Y_RATIO } from "./types";
 import type { Enemy } from "./enemy";
 import type { Obstacle } from "./obstacle";
 
@@ -29,7 +29,7 @@ export class Game {
     this.renderer = new Renderer(canvas);
     this.input = new Input(canvas);
     this.spawner = new Spawner();
-    this.player = new Player(this.width / 2, this.height * 0.75);
+    this.player = new Player(this.width / 2, this.height * PLAYER_SPAWN_Y_RATIO);
 
     this.input.onInput((x, y) => this.handleInput(x, y));
   }
@@ -37,11 +37,16 @@ export class Game {
   resize(width: number, height: number) {
     this.width = width;
     this.height = height;
+    this.renderer.updateDpr();
     this.player.clampToScreen(width, height);
   }
 
   start() {
     this.lastTime = performance.now();
+    this.scheduleFrame();
+  }
+
+  private scheduleFrame() {
     requestAnimationFrame((t) => this.loop(t));
   }
 
@@ -55,7 +60,10 @@ export class Game {
     }
 
     this.render();
-    requestAnimationFrame((t) => this.loop(t));
+
+    if (this.state !== "gameover") {
+      this.scheduleFrame();
+    }
   }
 
   private update(dt: number) {
@@ -82,11 +90,19 @@ export class Game {
       obstacle.update(dt);
     }
 
-    // Cleanup off-screen enemies
-    this.enemies = this.enemies.filter((e) => !e.isOffScreen(this.height));
+    // Cleanup off-screen enemies (reverse-iterate to avoid index shifting)
+    for (let i = this.enemies.length - 1; i >= 0; i--) {
+      if (this.enemies[i].isOffScreen(this.height)) {
+        this.enemies.splice(i, 1);
+      }
+    }
 
     // Cleanup expired obstacles
-    this.obstacles = this.obstacles.filter((o) => !o.isExpired);
+    for (let i = this.obstacles.length - 1; i >= 0; i--) {
+      if (this.obstacles[i].isExpired) {
+        this.obstacles.splice(i, 1);
+      }
+    }
 
     // Collision: player vs enemies
     for (const enemy of this.enemies) {
@@ -141,6 +157,8 @@ export class Game {
         break;
       case "gameover":
         this.restart();
+        this.lastTime = performance.now();
+        this.scheduleFrame();
         break;
     }
   }
@@ -155,6 +173,6 @@ export class Game {
     this.enemies = [];
     this.obstacles = [];
     this.spawner.reset();
-    this.player.reset(this.width / 2, this.height * 0.75);
+    this.player.reset(this.width / 2, this.height * PLAYER_SPAWN_Y_RATIO);
   }
 }
