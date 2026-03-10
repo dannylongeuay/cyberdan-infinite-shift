@@ -11,8 +11,5 @@ node_modules
 # Build output
 dist
 
-# Bun lockfile
-bun.lock
-
 # Compiled TypeScript output
 src/**/*.js
