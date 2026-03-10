@@ -1,32 +1,64 @@
 export type InputCallback = (x: number, y: number) => void;
+export type ReleaseCallback = () => void;
 
 export class Input {
-  private callback: InputCallback | null = null;
+  private pressCallback: InputCallback | null = null;
+  private moveCallback: InputCallback | null = null;
+  private releaseCallback: ReleaseCallback | null = null;
+  private pointerDown = false;
 
   constructor(private canvas: HTMLCanvasElement) {
-    this.canvas.addEventListener("click", this.handleClick);
-    this.canvas.addEventListener("touchstart", this.handleTouch, { passive: false });
+    this.canvas.addEventListener("pointerdown", this.handlePointerDown);
+    this.canvas.addEventListener("pointermove", this.handlePointerMove);
+    this.canvas.addEventListener("pointerup", this.handlePointerUp);
+    this.canvas.addEventListener("pointercancel", this.handlePointerUp);
+    this.canvas.addEventListener("pointerleave", this.handlePointerUp);
   }
 
-  onInput(cb: InputCallback) {
-    this.callback = cb;
+  onPress(cb: InputCallback) {
+    this.pressCallback = cb;
   }
 
-  private handleClick = (e: MouseEvent) => {
+  onMove(cb: InputCallback) {
+    this.moveCallback = cb;
+  }
+
+  onRelease(cb: ReleaseCallback) {
+    this.releaseCallback = cb;
+  }
+
+  private toCanvasCoords(e: PointerEvent): [number, number] {
     const rect = this.canvas.getBoundingClientRect();
-    this.callback?.(e.clientX - rect.left, e.clientY - rect.top);
+    return [e.clientX - rect.left, e.clientY - rect.top];
+  }
+
+  private handlePointerDown = (e: PointerEvent) => {
+    this.pointerDown = true;
+    this.canvas.setPointerCapture(e.pointerId);
+    const [x, y] = this.toCanvasCoords(e);
+    this.pressCallback?.(x, y);
   };
 
-  private handleTouch = (e: TouchEvent) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    const rect = this.canvas.getBoundingClientRect();
-    this.callback?.(touch.clientX - rect.left, touch.clientY - rect.top);
+  private handlePointerMove = (e: PointerEvent) => {
+    if (!this.pointerDown) return;
+    const [x, y] = this.toCanvasCoords(e);
+    this.moveCallback?.(x, y);
+  };
+
+  private handlePointerUp = (_e: PointerEvent) => {
+    if (!this.pointerDown) return;
+    this.pointerDown = false;
+    this.releaseCallback?.();
   };
 
   destroy() {
-    this.canvas.removeEventListener("click", this.handleClick);
-    this.canvas.removeEventListener("touchstart", this.handleTouch);
-    this.callback = null;
+    this.canvas.removeEventListener("pointerdown", this.handlePointerDown);
+    this.canvas.removeEventListener("pointermove", this.handlePointerMove);
+    this.canvas.removeEventListener("pointerup", this.handlePointerUp);
+    this.canvas.removeEventListener("pointercancel", this.handlePointerUp);
+    this.canvas.removeEventListener("pointerleave", this.handlePointerUp);
+    this.pressCallback = null;
+    this.moveCallback = null;
+    this.releaseCallback = null;
   }
 }

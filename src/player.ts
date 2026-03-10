@@ -47,6 +47,11 @@ export class Player {
     v.y = Math.max(this.size, Math.min(height - this.size, v.y));
   }
 
+  stop() {
+    this.target.x = this.pos.x;
+    this.target.y = this.pos.y;
+  }
+
   reset(x: number, y: number) {
     this.pos = { x, y };
     this.target = { x, y };

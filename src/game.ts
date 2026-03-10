@@ -17,6 +17,7 @@ export class Game {
   private enemies: Enemy[] = [];
   private obstacles: Obstacle[] = [];
   private state: GameState = "ready";
+  private dragging = false;
   private score: number = 0;
   private lastTime: number = 0;
   private width: number;
@@ -31,7 +32,9 @@ export class Game {
     this.spawner = new Spawner();
     this.player = new Player(this.width / 2, this.height * PLAYER_SPAWN_Y_RATIO);
 
-    this.input.onInput((x, y) => this.handleInput(x, y));
+    this.input.onPress((x, y) => this.handlePress(x, y));
+    this.input.onMove((x, y) => this.handleMove(x, y));
+    this.input.onRelease(() => this.handleRelease());
   }
 
   resize(width: number, height: number) {
@@ -147,12 +150,13 @@ export class Game {
     }
   }
 
-  private handleInput(x: number, y: number) {
+  private handlePress(x: number, y: number) {
     switch (this.state) {
       case "ready":
         this.state = "playing";
         break;
       case "playing":
+        this.dragging = false;
         this.player.setTarget(x, y);
         break;
       case "gameover":
@@ -160,6 +164,20 @@ export class Game {
         this.lastTime = performance.now();
         this.scheduleFrame();
         break;
+    }
+  }
+
+  private handleMove(x: number, y: number) {
+    if (this.state !== "playing") return;
+    this.dragging = true;
+    this.player.setTarget(x, y);
+  }
+
+  private handleRelease() {
+    if (this.state !== "playing") return;
+    if (this.dragging) {
+      this.player.stop();
+      this.dragging = false;
     }
   }
 
@@ -173,6 +191,7 @@ export class Game {
     this.enemies = [];
     this.obstacles = [];
     this.spawner.reset();
+    this.dragging = false;
     this.player.reset(this.width / 2, this.height * PLAYER_SPAWN_Y_RATIO);
   }
 }
