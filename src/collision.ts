@@ -1,4 +1,4 @@
-import { PLAYER_TRIANGLE_BACK, PLAYER_TRIANGLE_HALF_WIDTH } from "./types";
+import { TRIANGLE_BACK, TRIANGLE_HALF_WIDTH } from "./types";
 import type { Vec2, ShapeKind } from "./types";
 
 export type Collider =
@@ -10,7 +10,7 @@ export function getCollider(
   pos: Vec2,
   angle: number,
   size: number,
-  shape: "triangle" | ShapeKind
+  shape: ShapeKind
 ): Collider {
   if (shape === "circle") {
     return { kind: "circle", center: pos, radius: size };
@@ -26,14 +26,14 @@ export function getCollider(
   return { kind: "polygon", vertices };
 }
 
-function localVertices(shape: "triangle" | Exclude<ShapeKind, "circle">, size: number): Vec2[] {
+function localVertices(shape: Exclude<ShapeKind, "circle">, size: number): Vec2[] {
   switch (shape) {
     case "triangle":
       // Matches renderer.ts drawPlayer (lines 67-69)
       return [
         { x: size, y: 0 },
-        { x: -size * PLAYER_TRIANGLE_BACK, y: -size * PLAYER_TRIANGLE_HALF_WIDTH },
-        { x: -size * PLAYER_TRIANGLE_BACK, y: size * PLAYER_TRIANGLE_HALF_WIDTH },
+        { x: -size * TRIANGLE_BACK, y: -size * TRIANGLE_HALF_WIDTH },
+        { x: -size * TRIANGLE_BACK, y: size * TRIANGLE_HALF_WIDTH },
       ];
     case "square":
       // Matches renderer.ts fillRect(-size, -size, size*2, size*2) (line 170)

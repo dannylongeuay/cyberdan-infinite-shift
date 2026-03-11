@@ -1,9 +1,10 @@
 import { PLAYER_SPEED, PLAYER_SIZE } from "./types";
-import type { Vec2 } from "./types";
+import type { Vec2, ShapeKind } from "./types";
 
 export class Player {
   pos: Vec2;
   target: Vec2;
+  shape: ShapeKind = "triangle";
   angle: number = 0;
   size: number = PLAYER_SIZE;
   private speed: number = PLAYER_SPEED;

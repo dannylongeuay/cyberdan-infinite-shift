@@ -107,7 +107,7 @@ export class Game {
     }
 
     // Collision: player vs enemies
-    const playerCollider = getCollider(this.player.pos, this.player.angle, this.player.size, "triangle");
+    const playerCollider = getCollider(this.player.pos, this.player.angle, this.player.size, this.player.shape);
 
     for (const enemy of this.enemies) {
       const ec = getCollider(enemy.pos, enemy.angle, enemy.size, enemy.shape);

@@ -5,8 +5,8 @@ import {
   COLOR_OBSTACLE,
   COLOR_OVERLAY,
   COLOR_UI,
-  PLAYER_TRIANGLE_BACK,
-  PLAYER_TRIANGLE_HALF_WIDTH,
+  TRIANGLE_BACK,
+  TRIANGLE_HALF_WIDTH,
   OBSTACLE_PULSE_SPEED,
   FONT_HUD,
   FONT_TITLE,
@@ -55,21 +55,13 @@ export class Renderer {
 
   drawPlayer(player: Player) {
     const { x, y } = player.pos;
-    const size = player.size;
-    const angle = player.angle;
     const ctx = this.ctx;
 
     ctx.save();
     ctx.translate(x, y);
-    ctx.rotate(angle);
-    ctx.beginPath();
-    // Triangle: front point at +size, two rear points
-    ctx.moveTo(size, 0);
-    ctx.lineTo(-size * PLAYER_TRIANGLE_BACK, -size * PLAYER_TRIANGLE_HALF_WIDTH);
-    ctx.lineTo(-size * PLAYER_TRIANGLE_BACK, size * PLAYER_TRIANGLE_HALF_WIDTH);
-    ctx.closePath();
+    ctx.rotate(player.angle);
     ctx.fillStyle = COLOR_PLAYER;
-    ctx.fill();
+    this.drawShape(player.shape, player.size);
     ctx.restore();
   }
 
@@ -161,6 +153,14 @@ export class Renderer {
   private drawShape(shape: ShapeKind, size: number, mode: "fill" | "stroke" = "fill") {
     const ctx = this.ctx;
     switch (shape) {
+      case "triangle":
+        ctx.beginPath();
+        ctx.moveTo(size, 0);
+        ctx.lineTo(-size * TRIANGLE_BACK, -size * TRIANGLE_HALF_WIDTH);
+        ctx.lineTo(-size * TRIANGLE_BACK, size * TRIANGLE_HALF_WIDTH);
+        ctx.closePath();
+        ctx[mode]();
+        break;
       case "circle":
         ctx.beginPath();
         ctx.arc(0, 0, size, 0, Math.PI * 2);

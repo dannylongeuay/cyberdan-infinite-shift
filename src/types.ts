@@ -3,15 +3,15 @@ export interface Vec2 {
   y: number;
 }
 
-export type ShapeKind = "circle" | "square" | "hexagon" | "octagon";
+export type ShapeKind = "triangle" | "circle" | "square" | "hexagon" | "octagon";
 export const ENTITY_SHAPES: ShapeKind[] = ["circle", "square", "hexagon", "octagon"];
 
 // Player
 export const PLAYER_SIZE = 28; // bounding radius
 export const PLAYER_SPAWN_Y_RATIO = 0.75; // fraction of screen height
 export const PLAYER_SPEED = 250; // px/s
-export const PLAYER_TRIANGLE_BACK = 0.7; // rear point ratio
-export const PLAYER_TRIANGLE_HALF_WIDTH = 0.6; // half-width ratio
+export const TRIANGLE_BACK = 0.7; // rear point ratio
+export const TRIANGLE_HALF_WIDTH = 0.6; // half-width ratio
 
 // Enemy
 export const ENEMY_ANGULAR_SPREAD = 0.3; // radians off center
