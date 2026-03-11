@@ -2,7 +2,7 @@ import { Player } from "./player";
 import { Renderer } from "./renderer";
 import { Input } from "./input";
 import { Spawner } from "./spawner";
-import { checkCollision } from "./collision";
+import { checkCollision, getCollider } from "./collision";
 import { MAX_DT, MAX_ENEMIES, MAX_OBSTACLES, PLAYER_SPAWN_Y_RATIO } from "./types";
 import type { Enemy } from "./enemy";
 import type { Obstacle } from "./obstacle";
@@ -107,8 +107,11 @@ export class Game {
     }
 
     // Collision: player vs enemies
+    const playerCollider = getCollider(this.player.pos, this.player.angle, this.player.size, "triangle");
+
     for (const enemy of this.enemies) {
-      if (checkCollision(this.player.pos, this.player.size, enemy.pos, enemy.size)) {
+      const ec = getCollider(enemy.pos, enemy.angle, enemy.size, enemy.shape);
+      if (checkCollision(playerCollider, ec)) {
         this.gameOver();
         return;
       }
@@ -116,12 +119,12 @@ export class Game {
 
     // Collision: player vs active obstacles
     for (const obstacle of this.obstacles) {
-      if (
-        obstacle.isCollidable &&
-        checkCollision(this.player.pos, this.player.size, obstacle.pos, obstacle.size)
-      ) {
-        this.gameOver();
-        return;
+      if (obstacle.isCollidable) {
+        const oc = getCollider(obstacle.pos, obstacle.rotation, obstacle.size, obstacle.shape);
+        if (checkCollision(playerCollider, oc)) {
+          this.gameOver();
+          return;
+        }
       }
     }
   }
